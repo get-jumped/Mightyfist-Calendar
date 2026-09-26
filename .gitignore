@@ -1,1 +1,4 @@
 node_modules/
+
+# Contains access tokens NEVER COMMIT
+.clasprc.json
