@@ -1,10 +1,22 @@
 function pullData() {
+    const monthNames = [
+        "January", "February", "March", "April", "May", "June",
+        "July", "August", "September", "October", "November", "December"
+    ];
+
     // Consider giving the sheet that lists the availability a better name
     const sourceSheet = SpreadsheetApp.openById('1tlSdMngNsnmXRxxgbEIFBlbQ6UphVphRQHQEW2wtpIs').getSheetByName("Sheet1");
     let data = sourceSheet.getRange(9, 2, 6, 10).getValues();
 
     data = fillMerges(data);
     console.log(data);
+
+    const date = new Date();
+    const year = date.getFullYear();
+    const month = date.getMonth();
+
+    let calendar = buildCalendar(year, month);
+    console.log(calendar);
 }
 
 // Fills in missing times due to merged cells (only fills in missing times if 
@@ -27,7 +39,48 @@ function fillMerges(schedule) {
     return schedule
 }
 
-pullData();
+// Returns the calendar for the given year and month
+function buildCalendar(year, month) {
+    let calendar = [];
+
+    //Gets what day (MON, TUES, WED, ...) the first day of the month falls on
+    const firstDay = new Date(year, month, 1).getDay();
+    
+    //Gets the total number of days/last day of the month
+    const numDays = new Date(year, month + 1, 0).getDate();
+
+    //Fills the array with null for the days from the previous month
+    let week = [];
+    for(let i = 0; i < firstDay; i++)
+    {
+        week.push(null);
+    }
+
+    //Creates the calendar for the given month
+    for(let j = 1; j <= numDays; j++)
+    {
+        week.push(j);
+
+        if(week.length == 7)
+        {
+            calendar.push(week);
+            week = []
+        }
+    }
+
+    if(week.length > 0)
+    {
+        while(week.length < 7)
+        {
+            week.push(null);
+        }
+        calendar.push(week);
+    }
+
+    return calendar;
+}
+
+console.log(buildCalendar(2026, 8));
 
 // Structure of recieved data
 // [ [ 'Mon', '', 'Tue', '', 'Wed', '', 'Thu', '', 'Fri', '' ],
