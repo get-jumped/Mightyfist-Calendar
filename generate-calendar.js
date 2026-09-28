@@ -8,8 +8,8 @@ function pullData() {
     const sourceSheet = SpreadsheetApp.openById('1tlSdMngNsnmXRxxgbEIFBlbQ6UphVphRQHQEW2wtpIs').getSheetByName("Sheet1");
     let data = sourceSheet.getRange(9, 2, 6, 10).getValues();
 
-    data = fillMerges(data);
-    console.log(data);
+    schedule = fillMerges(data);
+    console.log(schedule);
 
     const date = new Date();
     const year = date.getFullYear();
@@ -17,26 +17,38 @@ function pullData() {
 
     let calendar = buildCalendar(year, month);
     console.log(calendar);
+
+    fillSpreadSheet(calendar, schedule);
 }
 
 // Fills in missing times due to merged cells (only fills in missing times if 
 // someone signed up for the timeslot. Reason to avoid confusion with cells that
 // have no timeslots)
-// INPUT: schedule is a 2D array that represents the schedule
-function fillMerges(schedule) {
+// INPUT: data - a 2D array that represents the schedule
+// OUTPUT: newSchedule - a 2D array that is in the format we want to put into the calender spreadsheet
+function fillMerges(data) {
+    let newSchedule =[];
 
-    for(let i = 1; i < schedule.length; i++)
+    for(let i = 1; i < data.length; i++)
     {
-        for(let j = 1; j < schedule[i].length; j += 2)
+        let temp = [];
+        for(let j = 1; j < data[i].length; j += 2)
         {
-            if(schedule[i][j] != '' && schedule[i][j - 1] == '')
+            // IF there is a name but no time with it
+            if(data[i][j] != '' && data[i][j - 1] == '')
             {
-                schedule[i][j - 1] = schedule[i - 1][j - 1];
+                temp.push(data[i][j] + " " + data[i - 1][j - 1]);
+            }
+            // IF there is a name and time
+            else
+            {
+                temp.push(data[i][j] + " " + data[i][j - 1]);
             }
         }
+        newSchedule.push(temp);
     }
 
-    return schedule
+    return newSchedule
 }
 
 // Returns the calendar for the given year and month
@@ -80,12 +92,48 @@ function buildCalendar(year, month) {
     return calendar;
 }
 
-console.log(buildCalendar(2026, 8));
+// input: calendar - a 2D array that represents the current month
+//        schedule - a 2D array that represents the schedule of instructors  
+function fillSpreadSheet(calendar, schedule) {
+    const calendarSheet = SpreadsheetApp.openById('1E_nqdi1ZDexe-v64TkuQq_Th8ScHAq6-KZlFiyxEKjI').getSheetByName("Sheet1");
 
-// Structure of recieved data
+    for(let i = 1; i <= calendar.length; i++)
+    {
+        calendarSheet.getRange(i, 1, 1, 7).setValues([calendar[i - 1]]);
+        calendarSheet.getRange(i + 1, 2, 5, 5).setValues();
+    }
+
+    calendarSheet.getDataRange().setHorizontalAlignment('center').setVerticalAlignment('middle');
+}
+
+
+
+// HELPER FUNCTIONS
+
+// Function takes a name and truncates the first name to fit in the schedule
+// INPUT: name - string of an instructors name
+// OUTPUT: truncated name in the form of first inital lastname (J Doe)
+function transformName(name)
+{
+    return name[0] + " " + name.slice(name.indexOf(' ') + 1);
+}
+
+// Function takes a time and truncates it by removing the AM/PM and 'to'
+// INPUT: time - string of a time slot
+// OUTPUT: truncated time in the form of XX:XX-XX:XX
+function transformTime(time)
+{
+
+}
+
+// console.log(buildCalendar(2026, 8));
+
+// Structure DATA
 // [ [ 'Mon', '', 'Tue', '', 'Wed', '', 'Thu', '', 'Fri', '' ],
 //   [ '3:45 PM to 6:00 PM','Instructor One','3:45 PM to 6:00 PM','Instructor Five','3:45 PM to 6:00 PM','Instructor Four','3:45 PM to 6:00 PM','Instructor Eight','4:30 PM to 6:45 PM','' ],
 //   [ '4:30 PM to 6:45 PM','Instructor Two','4:30 PM to 6:45 PM','Instructor Six','4:30 PM to 6:45 PM','Instructor Seven','','','4:30 PM to 7:30 PM','Instructor Three' ],
 //   [ '5:15 PM to 7:30 PM','Instructor Three','5:15 PM to 7:30 PM','Instructor Three','5:15 PM to 7:30 PM','Instructor Five','5:15 PM to 7:30 PM','Instructor Six','5:15 PM to 7:30 PM','Instructor One' ],
 //   [ '','Instructor Four','','Instructor two','','','','Instructor Seven','','Instructor Eight' ],
 //   [ '', '', '', '', '', '', '', '', '', '' ] ]
+
+// Structure of Schedule
