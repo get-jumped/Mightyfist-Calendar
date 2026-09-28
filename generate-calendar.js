@@ -123,10 +123,25 @@ function transformName(name)
 // OUTPUT: truncated time in the form of XX:XX-XX:XX
 function transformTime(time)
 {
+    // 3:45 PM to 6:00 PM
+    let startTime = time.slice(0, time.indexOf(' '));
+    let endTime = "";
+    
+    for(let i = time.indexOf(' ') + 1; i < time.length; i++)
+    {
+        if(/^\d$/.test(time[i]))
+        {
+            endTime = time.slice(i, time.indexOf(' ', i));
+            break;
+        }
+    }
 
+    return startTime + "-" + endTime;
 }
 
 // console.log(buildCalendar(2026, 8));
+console.log(transformName("John Doe"));
+console.log(transformTime('3:45 PM to 6:00 PM'));
 
 // Structure DATA
 // [ [ 'Mon', '', 'Tue', '', 'Wed', '', 'Thu', '', 'Fri', '' ],
