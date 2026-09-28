@@ -104,8 +104,9 @@ function fillSpreadSheet(calendar, schedule) {
 
     for(let i = 1; i <= calendar.length; i++)
     {
-        calendarSheet.getRange(i, 1, 1, 7).setValues([calendar[i - 1]]);
-        // calendarSheet.getRange(i + 1, 2, 5, 5).setValues();
+        let startIndex = i + (6 * (i - 1));
+        calendarSheet.getRange(startIndex, 1, 1, 7).setValues([calendar[i - 1]]);
+        calendarSheet.getRange(startIndex + 1, 2, 5, 5).setValues(schedule);
     }
 
     calendarSheet.getDataRange().setHorizontalAlignment('center').setVerticalAlignment('middle');
