@@ -97,7 +97,7 @@ function buildCalendar(year, month) {
     return calendar;
 }
 
-// input: calendar - a 2D array that represents the current month
+// INPUT: calendar - a 2D array that represents the current month
 //        schedule - a 2D array that represents the schedule of instructors  
 function fillSpreadSheet(calendar, schedule) {
     const calendarSheet = SpreadsheetApp.openById('1E_nqdi1ZDexe-v64TkuQq_Th8ScHAq6-KZlFiyxEKjI').getSheetByName("Sheet1");
@@ -105,7 +105,7 @@ function fillSpreadSheet(calendar, schedule) {
     for(let i = 1; i <= calendar.length; i++)
     {
         calendarSheet.getRange(i, 1, 1, 7).setValues([calendar[i - 1]]);
-        calendarSheet.getRange(i + 1, 2, 5, 5).setValues();
+        // calendarSheet.getRange(i + 1, 2, 5, 5).setValues();
     }
 
     calendarSheet.getDataRange().setHorizontalAlignment('center').setVerticalAlignment('middle');
@@ -120,6 +120,11 @@ function fillSpreadSheet(calendar, schedule) {
 // OUTPUT: truncated name in the form of first inital lastname (J Doe)
 function transformName(name)
 {
+    if(name.length == 0)
+    {
+        return '';
+    }
+
     return name[0] + " " + name.slice(name.indexOf(' ') + 1);
 }
 
@@ -128,6 +133,11 @@ function transformName(name)
 // OUTPUT: truncated time in the form of XX:XX-XX:XX
 function transformTime(time)
 {
+    if(time.length == 0)
+    {
+        return '';
+    }
+
     let startTime = time.slice(0, time.indexOf(' '));
     let endTime = "";
     
