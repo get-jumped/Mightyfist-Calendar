@@ -34,16 +34,21 @@ function fillMerges(data) {
         let temp = [];
         for(let j = 1; j < data[i].length; j += 2)
         {
+            let name = data[i][j];
+            let time = "";
+
             // IF there is a name but no time with it
             if(data[i][j] != '' && data[i][j - 1] == '')
             {
-                temp.push(data[i][j] + " " + data[i - 1][j - 1]);
+                time = data[i - 1][j - 1];
             }
             // IF there is a name and time
             else
             {
-                temp.push(data[i][j] + " " + data[i][j - 1]);
+                time = data[i][j - 1];
             }
+
+            temp.push(transformName(name) + " " + transformTime(time));
         }
         newSchedule.push(temp);
     }
@@ -108,7 +113,7 @@ function fillSpreadSheet(calendar, schedule) {
 
 
 
-// HELPER FUNCTIONS
+// ---------------------------- HELPER FUNCTIONS ---------------------------- 
 
 // Function takes a name and truncates the first name to fit in the schedule
 // INPUT: name - string of an instructors name
@@ -123,7 +128,6 @@ function transformName(name)
 // OUTPUT: truncated time in the form of XX:XX-XX:XX
 function transformTime(time)
 {
-    // 3:45 PM to 6:00 PM
     let startTime = time.slice(0, time.indexOf(' '));
     let endTime = "";
     
@@ -140,8 +144,8 @@ function transformTime(time)
 }
 
 // console.log(buildCalendar(2026, 8));
-console.log(transformName("John Doe"));
-console.log(transformTime('3:45 PM to 6:00 PM'));
+// console.log(transformName("John Doe"));
+// console.log(transformTime('3:45 PM to 6:00 PM'));
 
 // Structure DATA
 // [ [ 'Mon', '', 'Tue', '', 'Wed', '', 'Thu', '', 'Fri', '' ],
