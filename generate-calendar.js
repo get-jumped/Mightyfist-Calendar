@@ -107,16 +107,33 @@ function buildCalendar(year, month) {
 //        schedule - a 2D array that represents the schedule of instructors  
 function fillSpreadSheet(calendar, schedule) {
     const calendarSheet = SpreadsheetApp.openById('1E_nqdi1ZDexe-v64TkuQq_Th8ScHAq6-KZlFiyxEKjI').getSheetByName("Sheet1");
+    const BUFFER = 20;
 
     for(let i = 1; i <= calendar.length; i++)
     {
         let startIndex = i + (6 * (i - 1));
-        calendarSheet.getRange(startIndex, 1, 1, 7).setValues([calendar[i - 1]]);
+        let dayRange = calendarSheet.getRange(startIndex, 1, 1, 7);
+
+        dayRange.setValues([calendar[i - 1]]);
+        dayRange.setBackground("#000000");
+        dayRange.setFontColor("white"); 
+
         calendarSheet.getRange(startIndex + 1, 2, 5, 5).setValues(schedule);
     }
 
     calendarSheet.getDataRange().setHorizontalAlignment('center').setVerticalAlignment('middle');
-    calendarSheet.setColumnWidths(1, 7, 150);
+    calendarSheet.autoResizeColumns(1, 7);
+
+    let maxColSize = -1;
+    for(let j = 1; j <= calendar.length; j++)
+    {
+        if(calendarSheet.getColumnWidth(j) > maxColSize)
+        {
+            maxColSize = calendarSheet.getColumnWidth(j);
+        }
+    }
+
+    calendarSheet.setColumnWidths(1, 7, maxColSize + BUFFER);
 }
 
 
