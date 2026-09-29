@@ -42,6 +42,12 @@ function fillMerges(data) {
             {
                 time = data[i - 1][j - 1];
             }
+            // IF ther is a time but no name
+            else if(data[i][j] == '' && data[i][j - 1] != '')
+            {
+                name = '';
+                time = '';
+            }
             // IF there is a name and time
             else
             {
@@ -110,6 +116,7 @@ function fillSpreadSheet(calendar, schedule) {
     }
 
     calendarSheet.getDataRange().setHorizontalAlignment('center').setVerticalAlignment('middle');
+    calendarSheet.setColumnWidths(1, 7, 150);
 }
 
 
