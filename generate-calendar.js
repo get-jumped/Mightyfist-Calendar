@@ -170,6 +170,8 @@ function fillHeaders(sheet, header, background_color, text_color, row, col)
 
 function fillWeekdaySchedule(sheet, schedule, start)
 {
+    console.log("FILLING CELLS in format row col");
+    console.log(start + ", 2")
     range = sheet.getRange(start, 2, schedule.length, schedule[0].length);
     range.setValues(schedule);
 }
