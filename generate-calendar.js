@@ -18,7 +18,7 @@ function pullData() {
     let calendar = buildCalendar(year, month);
     console.log(calendar);
 
-    fillSpreadSheet(calendar, schedule);
+    fillCalendar(calendar, schedule);
 }
 
 // Fills in missing times due to merged cells (only fills in missing times if 
@@ -103,22 +103,24 @@ function buildCalendar(year, month) {
     return calendar;
 }
 
-// INPUT: calendar - a 2D array that represents the current month
-//        schedule - a 2D array that represents the schedule of instructors  
-function fillSpreadSheet(calendar, schedule) {
+/**
+ * Function that fills the calendar with the given month and given schedule
+ * @param {2D array} calendar represents the current month
+ * @param {2D array} schedule represents the schedule of instructors
+ */
+function fillCalendar(calendar, schedule) {
     const calendarSheet = SpreadsheetApp.openById('1E_nqdi1ZDexe-v64TkuQq_Th8ScHAq6-KZlFiyxEKjI').getSheetByName("Sheet1");
     const BUFFER = 20;
+    const TRANIESS = Array(5).fill('TRAINEES');
 
     for(let i = 1; i <= calendar.length; i++)
     {
         let startIndex = i + (6 * (i - 1));
-        let dayRange = calendarSheet.getRange(startIndex, 1, 1, 7);
+        fillHeaders(calendarSheet, [calendar[i - 1]], 'black', 'white', startIndex, 1, 7);
 
-        dayRange.setValues([calendar[i - 1]]);
-        dayRange.setBackground("#000000");
-        dayRange.setFontColor("white"); 
+        fillWeekdaySchedule(calendarSheet, schedule, startIndex + 1);
 
-        calendarSheet.getRange(startIndex + 1, 2, 5, 5).setValues(schedule);
+        // calendarSheet.getRange(startIndex + 1, )
     }
 
     calendarSheet.getDataRange().setHorizontalAlignment('center').setVerticalAlignment('middle');
@@ -136,13 +138,38 @@ function fillSpreadSheet(calendar, schedule) {
     calendarSheet.setColumnWidths(1, 7, maxColSize + BUFFER);
 }
 
+/**
+ * 
+ * @param {*} sheet  
+ * @param {*} header 
+ * @param {*} background_color 
+ * @param {*} text_color 
+ * @param {*} start 
+ * @param {*} height 
+ * @param {*} width 
+ */
+function fillHeaders(sheet, header, background_color, text_color, start, height, width)
+{
+    range = sheet.getRange(start, 1, height, width);
+    range.setValues(header);
+    range.setBackground(background_color);
+    range.setFontColor(text_color);
+}
+
+function fillWeekdaySchedule(sheet, schedule, start)
+{
+    range = sheet.getRange(start, 2, schedule.length, schedule[0].length);
+    range.setValues(schedule);
+}
 
 
 // ---------------------------- HELPER FUNCTIONS ---------------------------- 
 
-// Function takes a name and truncates the first name to fit in the schedule
-// INPUT: name - string of an instructors name
-// OUTPUT: truncated name in the form of first inital lastname (J Doe)
+/**
+ * Function takes a name and truncates the first name to fit in the schedule
+ * @param {string} name - string of an instructors name
+ * @return {string} Truncated name in the form of first inital lastname (J Doe)
+ */
 function transformName(name)
 {
     if(name.length == 0)
@@ -153,9 +180,11 @@ function transformName(name)
     return name[0] + " " + name.slice(name.indexOf(' ') + 1);
 }
 
-// Function takes a time and truncates it by removing the AM/PM and 'to'
-// INPUT: time - string of a time slot
-// OUTPUT: truncated time in the form of XX:XX-XX:XX
+/**
+ * Function takes a time and truncates it by removing the AM/PM and 'to'
+ * @param {string} time - string of a time slot
+ * @return {string} Truncated time in the form of XX:XX-XX:XX
+ */
 function transformTime(time)
 {
     if(time.length == 0)
@@ -176,6 +205,69 @@ function transformTime(time)
     }
 
     return startTime + "-" + endTime;
+}
+
+/**
+ * GENERATED WITH GEMINI
+ * Converts a standard Google color name to its corresponding Hex code.
+ * @param {string} colorName The name of the color (case-insensitive).
+ * @return {string} The hex color code or a fallback if not found.
+ */
+function colorNameToHex(colorName) {
+  // Normalize the input name
+  const name = colorName.toLowerCase().replace(/\s+/g, '_');
+
+  // Google Workspace Standard Color Map
+  const colorMap = {
+    // Grayscale
+    'black': '#000000',
+    'white': '#ffffff',
+    'dark_gray_4': '#434343',
+    'dark_gray_3': '#666666',
+    'dark_gray_2': '#999999',
+    'dark_gray_1': '#b7b7b7',
+    'gray': '#cccccc',
+    'light_gray_1': '#d9d9d9',
+    'light_gray_2': '#efefef',
+    'light_gray_3': '#f3f3f3',
+
+    // Standard Chromatic Tones
+    'red': '#ff0000',
+    'orange': '#ff9900',
+    'yellow': '#ffff00',
+    'green': '#00ff00',
+    'cyan': '#00ffff',
+    'cornflower_blue': '#4a86e8',
+    'blue': '#0000ff',
+    'purple': '#9900ff',
+    'magenta': '#ff00ff',
+    'red_berry': '#990000',
+
+    // Common Light/Dark Variants
+    'light_red_3': '#f4cccc',
+    'light_red_2': '#ea9999',
+    'light_red_1': '#e06666',
+    'dark_red_1': '#cc0000',
+    'dark_red_2': '#990000',
+    'dark_red_3': '#660000',
+
+    'light_green_3': '#d9ead3',
+    'light_green_2': '#b6d7a8',
+    'light_green_1': '#93c47d',
+    'dark_green_1': '#6aa84f',
+    'dark_green_2': '#38761d',
+    'dark_green_3': '#274e13',
+
+    'light_blue_3': '#c9daf8',
+    'light_blue_2': '#a4c2f4',
+    'light_blue_1': '#6d9eeb',
+    'dark_blue_1': '#3c78d8',
+    'dark_blue_2': '#1155cc',
+    'dark_blue_3': '#1c4587'
+  };
+
+  // Return the hex code if found, otherwise return a default fallback (e.g., black)
+  return colorMap[name] || '#000000'; 
 }
 
 // console.log(buildCalendar(2026, 8));
