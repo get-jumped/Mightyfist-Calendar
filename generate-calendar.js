@@ -8,8 +8,13 @@ function pullData() {
     const sourceSheet = SpreadsheetApp.openById('1tlSdMngNsnmXRxxgbEIFBlbQ6UphVphRQHQEW2wtpIs').getSheetByName("Sheet1");
     let data = sourceSheet.getRange(9, 2, 6, 10).getValues();
 
+    const traineeSheet = SpreadsheetApp.openById('1SiOwYvIu3a7zYg2w1bUhvj9L4sAw2MmjfecXN-JnbKk').getSheetByName("Sheet1");
+    let traineeData = traineeSheet.getRange(9, 2, 6, 10).getValues();
+
     schedule = fillMerges(data);
     console.log(schedule);
+
+    traineeSchedule = fillMerges(traineeData);
 
     const date = new Date();
     const year = date.getFullYear();
@@ -18,7 +23,7 @@ function pullData() {
     let calendar = buildCalendar(year, month);
     console.log(calendar);
 
-    fillCalendar(calendar, schedule);
+    fillCalendar(calendar, schedule, traineeSchedule);
 }
 
 // Fills in missing times due to merged cells (only fills in missing times if 
@@ -103,24 +108,31 @@ function buildCalendar(year, month) {
     return calendar;
 }
 
+
+/***
+ * IMPORTANT PLAN TO MAKE CHANGES WHERE YOU PUT IN EITHER AN ARRAY OR NUM FOR THE 
+ * NUMBER OF SCHEDULES, HEADERS, CONSTANTS YOU HAVE IN ONE LINE OF THE CALENDAR
+ */
 /**
  * Function that fills the calendar with the given month and given schedule
  * @param {2D array} calendar represents the current month
  * @param {2D array} schedule represents the schedule of instructors
  */
-function fillCalendar(calendar, schedule) {
+function fillCalendar(calendar, schedule, traineeSchedule) {
     const calendarSheet = SpreadsheetApp.openById('1E_nqdi1ZDexe-v64TkuQq_Th8ScHAq6-KZlFiyxEKjI').getSheetByName("Sheet1");
     const BUFFER = 20;
-    const TRANIESS = Array(5).fill('TRAINEES');
+    const TRANIEES = [Array(5).fill('TRAINEES')];
 
     for(let i = 1; i <= calendar.length; i++)
     {
-        let startIndex = i + (6 * (i - 1));
-        fillHeaders(calendarSheet, [calendar[i - 1]], 'black', 'white', startIndex, 1, 7);
+        let startIndex = i + (11 * (i - 1));
+        fillHeaders(calendarSheet, [calendar[i - 1]], 'black', 'white', startIndex, 1);
 
         fillWeekdaySchedule(calendarSheet, schedule, startIndex + 1);
 
-        // calendarSheet.getRange(startIndex + 1, )
+        fillHeaders(calendarSheet, TRANIEES, 'light_blue_2', 'black', startIndex + 6, 2);
+
+        fillWeekdaySchedule(calendarSheet, traineeSchedule, startIndex + 7);
     }
 
     calendarSheet.getDataRange().setHorizontalAlignment('center').setVerticalAlignment('middle');
@@ -148,9 +160,9 @@ function fillCalendar(calendar, schedule) {
  * @param {*} height 
  * @param {*} width 
  */
-function fillHeaders(sheet, header, background_color, text_color, start, height, width)
+function fillHeaders(sheet, header, background_color, text_color, row, col)
 {
-    range = sheet.getRange(start, 1, height, width);
+    range = sheet.getRange(row, col, header.length, header[0].length);
     range.setValues(header);
     range.setBackground(background_color);
     range.setFontColor(text_color);
@@ -209,6 +221,7 @@ function transformTime(time)
 
 /**
  * GENERATED WITH GEMINI
+ * White is the default color
  * Converts a standard Google color name to its corresponding Hex code.
  * @param {string} colorName The name of the color (case-insensitive).
  * @return {string} The hex color code or a fallback if not found.
