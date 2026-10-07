@@ -28,8 +28,8 @@ async def on_member_join(member):
 
 @bot.command()
 async def unavailable(ctx, *, msg):
-    print("STARTING")
     params = {
+        "command": "unavailable",
         "username": str(ctx.author),
         "message": msg
     }
@@ -40,7 +40,6 @@ async def unavailable(ctx, *, msg):
         return
 
     try:
-        print(params)
         async with aiohttp.ClientSession() as session:
             async with session.post(
                 url,
@@ -62,8 +61,6 @@ async def unavailable(ctx, *, msg):
         await ctx.send("Apps Script returned something that wasn't JSON.")
     except (aiohttp.ClientError, TimeoutError) as e:
         await ctx.send(f"An error occurred while sending data: {e}")    
-
-    print("DONE")
 
 
 

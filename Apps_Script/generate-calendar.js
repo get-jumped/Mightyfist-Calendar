@@ -59,7 +59,7 @@ function fillMerges(data) {
                 time = data[i][j - 1];
             }
 
-            temp.push(transformName(name) + " " + transformTime(time));
+            temp.push(name + " " + transformTime(time));
         }
         newSchedule.push(temp);
     }
@@ -177,6 +177,7 @@ function fillWeekdaySchedule(sheet, schedule, start)
 // ---------------------------- HELPER FUNCTIONS ---------------------------- 
 
 /**
+ * DEPRECIATED
  * Function takes a name and truncates the first name to fit in the schedule
  * @param {string} name - string of an instructors name
  * @return {string} Truncated name in the form of first inital lastname (J Doe)
