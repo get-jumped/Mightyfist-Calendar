@@ -174,7 +174,6 @@ function fillWeekdaySchedule(sheet, schedule, start)
     range.setValues(schedule);
 }
 
-
 // ---------------------------- HELPER FUNCTIONS ---------------------------- 
 
 /**
