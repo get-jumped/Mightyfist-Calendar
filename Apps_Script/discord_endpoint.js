@@ -6,15 +6,20 @@ function doPost(e){
         // Example: Log the data or write it to a Google Sheet
         var command = data.command;
         var username = data.username;
-        var days = data.days;
 
         if(command == 'unavailable')
         {
-            const sol = unavailable(username, days);
+            var days = data.days;
+            unavailable(username, days);
+        }
+        else if (command == 'confirm')
+        {
+            var channel = data.channel;
+            confirm(username);
         }
         
         // Return a success response back to the Python bot
-        return ContentService.createTextOutput(JSON.stringify({ "status": "success", "username": username, "days": days}))
+        return ContentService.createTextOutput(JSON.stringify({ "status": "success", "username": username}))
                                 .setMimeType(ContentService.MimeType.JSON);
                             
     } catch (error) {
@@ -67,7 +72,15 @@ function unavailable(username, days)
     }
 }
 
+/**
+ * 
+ * @param {String} username 
+ * @param {String} channel 
+ */
+function confirm(username, channel)
+{
 
+}
 
 /** --------------------------- HELPER FUNCTIONS --------------------------- */
 /**
