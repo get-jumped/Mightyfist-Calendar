@@ -31,25 +31,23 @@ function doPost(e){
 function unavailable(username, msg)
 {
     const calendarSheet = SpreadsheetApp.openById('1E_nqdi1ZDexe-v64TkuQq_Th8ScHAq6-KZlFiyxEKjI').getSheetByName("Sheet1");
-    const calendar = calendarSheet.getRange().getValues();
-    const searchValue = 'TargetValue';
+    const searchCalendar = calendarSheet.getDataRange().createTextFinder('10');
 
     // Custom configurations (Optional)
-    textFinder.matchEntireCell(true); // Matches whole cell content only
-    textFinder.matchCase(true);       // Case-sensitive search
+    searchCalendar.matchEntireCell(true); // Matches whole cell content only
+    searchCalendar.matchCase(true);       // Case-sensitive search
 
     // Find the first occurrence
-    const foundRange = textFinder.findNext();
+    const foundRange = searchCalendar.findNext();
+
+    const cellLength = getCalendarWeekHeight();
 
     if (foundRange) {
-    const row = foundRange.getRow();
-    const column = foundRange.getColumn();
-    console.log(`Found value at Row: ${row}, Column: ${column}`);
-
-    // Example action: Set the value of the cell right next to it
-    sheet.getRange(row, column + 1).setValue("Updated!");
+        const row = foundRange.getRow();
+        const column = foundRange.getColumn();
+        console.log(`Found value at Row: ${row}, Column: ${column}, with height of ${cellLength}`);
     } else {
-    console.log("Value not found.");
+        console.log("Value not found.");
     }
 }
 
@@ -78,3 +76,11 @@ function getCalendarWeekHeight()
 
     return height;
 }
+
+
+
+
+
+
+
+

@@ -28,10 +28,12 @@ async def on_member_join(member):
 
 @bot.command()
 async def unavailable(ctx, *, msg):
+    days = parseMessage(msg)
+
     params = {
         "command": "unavailable",
         "username": str(ctx.author),
-        "message": msg
+        "days": days
     }
 
     url = os.getenv("APPS_SCRIPT_ENDPOINT")
@@ -62,6 +64,20 @@ async def unavailable(ctx, *, msg):
     except (aiohttp.ClientError, TimeoutError) as e:
         await ctx.send(f"An error occurred while sending data: {e}")    
 
+
+# ------------------------------------- HELPER FUNCITONS -------------------------------------
+def parseMessage(msg):
+    days = []
+    spaceIndex = msg.find(' ')
+
+    while spaceIndex != -1:
+        days.append(msg[:spaceIndex + 1])
+        msg = msg[spaceIndex + 1:]
+        spaceIndex = msg.find(' ')
+
+    days.append(msg)
+
+    return days
 
 
 
