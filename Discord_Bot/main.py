@@ -28,11 +28,12 @@ async def on_member_join(member):
 
 @bot.command()
 async def unavailable(ctx, *, msg):
+    member = ctx.author
     days = parseMessage(msg)
 
     params = {
         "command": "unavailable",
-        "username": str(ctx.author),
+        "username": str(member.display_name),
         "days": days
     }
 
@@ -55,7 +56,7 @@ async def unavailable(ctx, *, msg):
                 result = await response.json(content_type=None)
 
                 if result.get("status") == "success":
-                    await ctx.send(f"Data successfully synchronized with Google Apps Script! {result.get('username')}, {result.get('message')}")
+                    await ctx.send(f"Data successfully synchronized with Google Apps Script! {result.get('username')}, {result.get('days')}")
                 else:
                     await ctx.send(f"Apps Script error: {result.get('message')}")
 
@@ -71,7 +72,7 @@ def parseMessage(msg):
     spaceIndex = msg.find(' ')
 
     while spaceIndex != -1:
-        days.append(msg[:spaceIndex + 1])
+        days.append(msg[:spaceIndex])
         msg = msg[spaceIndex + 1:]
         spaceIndex = msg.find(' ')
 

@@ -6,15 +6,15 @@ function doPost(e){
         // Example: Log the data or write it to a Google Sheet
         var command = data.command;
         var username = data.username;
-        var message = data.message;
+        var days = data.days;
 
         if(command == 'unavailable')
         {
-            unavailable(username, message);
+            const sol = unavailable(username, days);
         }
-
+        
         // Return a success response back to the Python bot
-        return ContentService.createTextOutput(JSON.stringify({ "status": "success", "username": username, "message": message }))
+        return ContentService.createTextOutput(JSON.stringify({ "status": "success", "username": username, "days": days}))
                                 .setMimeType(ContentService.MimeType.JSON);
                             
     } catch (error) {
@@ -26,28 +26,44 @@ function doPost(e){
 /**
  * 
  * @param {string} username 
- * @param {string} msg 
+ * @param {Array} days 
  */
-function unavailable(username, msg)
+function unavailable(username, days)
 {
     const calendarSheet = SpreadsheetApp.openById('1E_nqdi1ZDexe-v64TkuQq_Th8ScHAq6-KZlFiyxEKjI').getSheetByName("Sheet1");
-    const searchCalendar = calendarSheet.getDataRange().createTextFinder('10');
-
-    // Custom configurations (Optional)
-    searchCalendar.matchEntireCell(true); // Matches whole cell content only
-    searchCalendar.matchCase(true);       // Case-sensitive search
-
-    // Find the first occurrence
-    const foundRange = searchCalendar.findNext();
-
     const cellLength = getCalendarWeekHeight();
 
-    if (foundRange) {
-        const row = foundRange.getRow();
-        const column = foundRange.getColumn();
-        console.log(`Found value at Row: ${row}, Column: ${column}, with height of ${cellLength}`);
-    } else {
-        console.log("Value not found.");
+    for(let i = 0; i < days.length; i++)
+    {
+        const searchCalendar = calendarSheet.getDataRange().createTextFinder(days[i]);
+
+        // Custom configurations (Optional)
+        searchCalendar.matchEntireCell(true); // Matches whole cell content only
+        searchCalendar.matchCase(true);       // Case-sensitive search
+
+        // Find the first occurrence
+        const foundRange = searchCalendar.findNext();
+
+        if (foundRange) {
+            const row = foundRange.getRow();
+            const column = foundRange.getColumn();
+
+            const searchDay = calendarSheet.getRange(row, column, cellLength, 1).createTextFinder(username).matchEntireCell(false);
+            const unavailableEntry = searchDay.findNext();
+
+            if(unavailableEntry)
+            {
+                const userRow = unavailableEntry.getRow();
+                const userCol = unavailableEntry.getColumn();
+
+                calendarSheet.getRange(userRow, userCol).setFontLine("line-through");
+            }
+            else{
+              console.log(`${username} not found on ${days[i]}`);
+            }
+        } else {
+            console.log("Value not found.");
+        }
     }
 }
 
@@ -76,8 +92,6 @@ function getCalendarWeekHeight()
 
     return height;
 }
-
-
 
 
 
