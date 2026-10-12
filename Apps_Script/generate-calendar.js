@@ -182,34 +182,43 @@ function fillWeekdaySchedule(sheet, schedule, start)
 function getTable(id)
 {
     const sheet = SpreadsheetApp.openById(id).getSheetByName('Sheet1');
-    const find = sheet.getDataRange().createTextFinder('Mon');
-
-    find.matchCase(False);
-    find.matchEntireCell(True);
+    const dataRange = sheet.getDataRange()
+    const find = dataRange.createTextFinder('Mon')
+        .matchCase(false)
+        .matchEntireCell(true);
 
     const foundCell = find.findNext();
 
-    if(foundCell)
+    if(!foundCell)
     {
-        var row = foundCell.getRow();
-        var col = foundCell.getColumn();
-        var rowLength = 0;
-        var colLength = 0;
-
-        while(sheet.getRange(row + rowLength, col).getBackground() != '#ffffff')
-        {
-            rowLength += 1;
-        }
-
-        while(sheet.getRange(row, col + colLength).getBackground() != '#ffffff')
-        {
-            colLength += 1;
-        }
-
-        return [rowLength, colLength];
+        return [-1, -1];
     }
 
-    return [-1, -1];
+    var row = foundCell.getRow();
+    var col = foundCell.getColumn();
+    var maxRow = sheet.getMaxRows();
+    var maxCol = sheet.getMaxColumns();
+
+    const merged = dataRange.getMergedRanges();
+
+    var rowLength = 0;
+    var colLength = 0;
+
+    while((row + rowLength <= maxRow && 
+        sheet.getRange(row + rowLength, col).getBackground() != '#ffffff') || 
+        mergedAt(merged, row + rowLength, col))
+    {
+        rowLength += 1;
+    }
+
+    while((col + colLength <= maxCol && 
+        sheet.getRange(row, col + colLength).getBackground() != '#ffffff') || 
+        mergedAt(merged, row, col + colLength))
+    {
+        colLength += 1;
+    }
+
+    return [rowLength, colLength];
 }
 
 // ---------------------------- HELPER FUNCTIONS ---------------------------- 
@@ -255,6 +264,22 @@ function transformTime(time)
     }
 
     return startTime + "-" + endTime;
+}
+
+/**
+ * 
+ * @param {Range} merged 
+ * @param {int} row 
+ * @param {int} col 
+ * @returns {boolean}
+ */
+function mergedAt(merged, row, col)
+{
+    var found = merged.find(range => 
+        row >= range.getRow() && row < range.getRow() + range.getNumRows() &&
+        col >= range.getColumn() && col < range.getColumn() + range.getNumColumns());
+    
+    return found !== undefined;
 }
 
 /**
