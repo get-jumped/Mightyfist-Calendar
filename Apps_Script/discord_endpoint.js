@@ -79,7 +79,20 @@ function unavailable(username, days)
  */
 function confirm(username, channel)
 {
+    var id = None;
+    if(channel == "instructor")
+    {
+        id = '1tlSdMngNsnmXRxxgbEIFBlbQ6UphVphRQHQEW2wtpIs';
+    }
+    else if(channel == "trainee")
+    {
+        id = '1SiOwYvIu3a7zYg2w1bUhvj9L4sAw2MmjfecXN-JnbKk';
+    }
 
+    const sheet = SpreadsheetApp.openById(id).getSheetByName("Sheet1");
+    const data = sheet.getDataRange().createTextFinder(username);
+
+    
 }
 
 /** --------------------------- HELPER FUNCTIONS --------------------------- */

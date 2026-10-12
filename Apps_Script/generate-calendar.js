@@ -174,6 +174,44 @@ function fillWeekdaySchedule(sheet, schedule, start)
     range.setValues(schedule);
 }
 
+/**
+ * 
+ * @param {String} id 
+ * @return {Array} number of rows followed by number of columns in the table
+ */
+function getTable(id)
+{
+    const sheet = SpreadsheetApp.openById(id).getSheetByName('Sheet1');
+    const find = sheet.getDataRange().createTextFinder('Mon');
+
+    find.matchCase(False);
+    find.matchEntireCell(True);
+
+    const foundCell = find.findNext();
+
+    if(foundCell)
+    {
+        var row = foundCell.getRow();
+        var col = foundCell.getColumn();
+        var rowLength = 0;
+        var colLength = 0;
+
+        while(sheet.getRange(row + rowLength, col).getBackground() != '#ffffff')
+        {
+            rowLength += 1;
+        }
+
+        while(sheet.getRange(row, col + colLength).getBackground() != '#ffffff')
+        {
+            colLength += 1;
+        }
+
+        return [rowLength, colLength];
+    }
+
+    return [-1, -1];
+}
+
 // ---------------------------- HELPER FUNCTIONS ---------------------------- 
 
 /**
