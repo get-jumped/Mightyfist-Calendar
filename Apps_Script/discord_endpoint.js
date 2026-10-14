@@ -15,7 +15,7 @@ function doPost(e){
         else if (command == 'confirm')
         {
             var channel = data.channel;
-            confirm(username);
+            confirm(username, channel);
         }
         
         // Return a success response back to the Python bot
@@ -79,7 +79,7 @@ function unavailable(username, days)
  */
 function confirm(username, channel)
 {
-    var id = None;
+    var id = null;
     if(channel == "instructor")
     {
         id = '1tlSdMngNsnmXRxxgbEIFBlbQ6UphVphRQHQEW2wtpIs';
@@ -90,9 +90,23 @@ function confirm(username, channel)
     }
 
     const sheet = SpreadsheetApp.openById(id).getSheetByName("Sheet1");
-    const data = sheet.getDataRange().createTextFinder(username);
-
+    const finder = sheet.getDataRange().createTextFinder(username)
+        .matchEntireCell(false)
+        .matchCase(false);
     
+    const foundCells = finder.findAll();
+
+    foundCells.forEach(cell => {
+        var changeCell = sheet.getRange(cell.getA1Notation());
+
+        var data = changeCell.getValue();
+
+        if(data.indexOf("*") == -1)
+        {
+            changeCell.setValue("**" + data);
+        }
+
+    });
 }
 
 /** --------------------------- HELPER FUNCTIONS --------------------------- */
