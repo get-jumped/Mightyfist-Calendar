@@ -1,4 +1,4 @@
-function pullData() {
+function createCalendar() {
     const monthNames = [
         "January", "February", "March", "April", "May", "June",
         "July", "August", "September", "October", "November", "December"
@@ -6,15 +6,26 @@ function pullData() {
 
     // Consider giving the sheet that lists the availability a better name
     const sourceSheet = SpreadsheetApp.openById('1tlSdMngNsnmXRxxgbEIFBlbQ6UphVphRQHQEW2wtpIs').getSheetByName("Sheet1");
-    let data = sourceSheet.getRange(9, 2, 6, 10).getValues();
+    var instructorDimensions = getTableDimensions('1tlSdMngNsnmXRxxgbEIFBlbQ6UphVphRQHQEW2wtpIs');
+    let instructorData = sourceSheet.getRange(instructorDimensions[0],
+        instructorDimensions[1],
+        instructorDimensions[2],
+        instructorDimensions[3]
+    ).getValues();
 
     const traineeSheet = SpreadsheetApp.openById('1SiOwYvIu3a7zYg2w1bUhvj9L4sAw2MmjfecXN-JnbKk').getSheetByName("Sheet1");
-    let traineeData = traineeSheet.getRange(9, 2, 6, 10).getValues();
+    var traineeDimensions = getTableDimensions('1SiOwYvIu3a7zYg2w1bUhvj9L4sAw2MmjfecXN-JnbKk');
+    let traineeData = traineeSheet.getRange(traineeDimensions[0],
+        traineeDimensions[1],
+        traineeDimensions[2],
+        traineeDimensions[3]
+    ).getValues();
 
-    schedule = fillMerges(data);
+    schedule = fillMerges(instructorData);
     console.log(schedule);
 
     traineeSchedule = fillMerges(traineeData);
+    console.log(traineeSchedule);
 
     const date = new Date();
     const year = date.getFullYear();
@@ -122,17 +133,22 @@ function fillCalendar(calendar, schedule, traineeSchedule) {
     const calendarSheet = SpreadsheetApp.openById('1E_nqdi1ZDexe-v64TkuQq_Th8ScHAq6-KZlFiyxEKjI').getSheetByName("Sheet1");
     const BUFFER = 20;
     const TRANIEES = [Array(5).fill('TRAINEES')];
+    const daySize = 2 + schedule.length + traineeSchedule.length;
 
     for(let i = 1; i <= calendar.length; i++)
     {
-        let startIndex = i + (11 * (i - 1));
+        let startIndex = i + (daySize * (i - 1));
+        
         fillHeaders(calendarSheet, [calendar[i - 1]], 'black', 'white', startIndex, 1);
 
-        fillWeekdaySchedule(calendarSheet, schedule, startIndex + 1);
+        let index = 1;
+        fillWeekdaySchedule(calendarSheet, schedule, startIndex + index);
+        index += schedule.length;
 
-        fillHeaders(calendarSheet, TRANIEES, 'light_blue_2', 'black', startIndex + 6, 2);
+        fillHeaders(calendarSheet, TRANIEES, 'light_blue_2', 'black', startIndex + index, 2);
+        index++;
 
-        fillWeekdaySchedule(calendarSheet, traineeSchedule, startIndex + 7);
+        fillWeekdaySchedule(calendarSheet, traineeSchedule, startIndex + index);
     }
 
     calendarSheet.getDataRange().setHorizontalAlignment('center').setVerticalAlignment('middle');
@@ -175,11 +191,12 @@ function fillWeekdaySchedule(sheet, schedule, start)
 }
 
 /**
+ * Works under the assumption that the table starts with Mon
  * 
  * @param {String} id 
- * @return {Array} number of rows followed by number of columns in the table
+ * @return {Array} row, columnm, number of rows followed by number of columns in the table
  */
-function getTable(id)
+function getTableDimensions(id)
 {
     const sheet = SpreadsheetApp.openById(id).getSheetByName('Sheet1');
     const dataRange = sheet.getDataRange()
@@ -218,7 +235,7 @@ function getTable(id)
         colLength += 1;
     }
 
-    return [rowLength, colLength];
+    return [row, col, rowLength, colLength];
 }
 
 // ---------------------------- HELPER FUNCTIONS ---------------------------- 
