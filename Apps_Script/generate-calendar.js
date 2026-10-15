@@ -23,7 +23,9 @@ function createCalendar() {
         traineeDimensions[3]
     );
     var traineeData = traineeRange.getValues();
-    var traineeMerges = traineeRanges.getMergedRanges();
+    var traineeMerges = traineeRange.getMergedRanges();
+
+    // console.log(traineeMerges.map(r => r.getA1Notation()));
 
     schedule = fillMerges(instructorData, instructorMerges);
     console.log(schedule);
@@ -59,16 +61,21 @@ function fillMerges(data, merges) {
         for(let j = 1; j < data[i].length; j += 2)
         {
             let name = transformName(removeStars(data[i][j]).trim());
-            let time = checkTime(name);
+            let time = checkTime(data[i][j]);
 
             if(time == null)
             {
                 // IF there is a name but no time with it
                 if(data[i][j] != '' && data[i][j - 1] == '')
                 {
-                    time = data[i - 1][j - 1];
+                    var back = 1;
+                    while(data[i - back][j - 1] == '')
+                    {
+                        back++;
+                    }
+                    time = data[i - back][j - 1];
                 }
-                // IF ther is a time but no name
+                // IF there is a time but no name
                 else if(data[i][j] == '' && data[i][j - 1] != '')
                 {
                     name = '';
@@ -270,7 +277,7 @@ function transformName(name)
     var end = name.indexOf(' ', name.indexOf(' ') + 1);
     if(end == -1)
     {
-        end = name.length - 1;
+        end = name.length;
     }
 
     return name.slice(0, end);
@@ -283,6 +290,11 @@ function transformName(name)
  */
 function transformTime(time)
 {
+    if(time == undefined)
+    {
+        return '';
+    }
+
     if(time.length == 0)
     {
         return '';
@@ -343,7 +355,7 @@ function checkTime(data)
 {
     if(data.indexOf('(') != -1)
     {
-        var time = data.slice(data.indexOf('(') + 1, data.indexOf(')') - 1);
+        var time = data.slice(data.indexOf('(') + 1, data.indexOf(')'));
 
         return time;
     }
