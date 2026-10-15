@@ -7,24 +7,28 @@ function createCalendar() {
     // Consider giving the sheet that lists the availability a better name
     const sourceSheet = SpreadsheetApp.openById('1tlSdMngNsnmXRxxgbEIFBlbQ6UphVphRQHQEW2wtpIs').getSheetByName("Sheet1");
     var instructorDimensions = getTableDimensions('1tlSdMngNsnmXRxxgbEIFBlbQ6UphVphRQHQEW2wtpIs');
-    let instructorData = sourceSheet.getRange(instructorDimensions[0],
+    let instructorRange = sourceSheet.getRange(instructorDimensions[0],
         instructorDimensions[1],
         instructorDimensions[2],
         instructorDimensions[3]
-    ).getValues();
+    );
+    var instructorData = instructorRange.getValues();
+    var instructorMerges = instructorRange.getMergedRanges();
 
     const traineeSheet = SpreadsheetApp.openById('1SiOwYvIu3a7zYg2w1bUhvj9L4sAw2MmjfecXN-JnbKk').getSheetByName("Sheet1");
     var traineeDimensions = getTableDimensions('1SiOwYvIu3a7zYg2w1bUhvj9L4sAw2MmjfecXN-JnbKk');
-    let traineeData = traineeSheet.getRange(traineeDimensions[0],
+    let traineeRange = traineeSheet.getRange(traineeDimensions[0],
         traineeDimensions[1],
         traineeDimensions[2],
         traineeDimensions[3]
-    ).getValues();
+    );
+    var traineeData = traineeRange.getValues();
+    var traineeMerges = traineeRanges.getMergedRanges();
 
-    schedule = fillMerges(instructorData);
+    schedule = fillMerges(instructorData, instructorMerges);
     console.log(schedule);
 
-    traineeSchedule = fillMerges(traineeData);
+    traineeSchedule = fillMerges(traineeData, traineeMerges);
     console.log(traineeSchedule);
 
     const date = new Date();
@@ -37,12 +41,16 @@ function createCalendar() {
     fillCalendar(calendar, schedule, traineeSchedule);
 }
 
-// Fills in missing times due to merged cells (only fills in missing times if 
-// someone signed up for the timeslot. Reason to avoid confusion with cells that
-// have no timeslots)
-// INPUT: data - a 2D array that represents the schedule
-// OUTPUT: newSchedule - a 2D array that is in the format we want to put into the calender spreadsheet
-function fillMerges(data) {
+/**
+ * Fills in missing times due to merged cells (only fills in missing times if 
+ * someone signed up for the timeslot. Reason to avoid confusion with cells that
+ * have no timeslots)
+ * 
+ * @param {2D Array} data a 2D array that represents the schedule
+ * @param {Range} merges 
+ * @returns newSchedule - a 2D array that is in the format we want to put into the calender spreadsheet
+ */
+function fillMerges(data, merges) {
     let newSchedule =[];
 
     for(let i = 1; i < data.length; i++)
@@ -50,27 +58,34 @@ function fillMerges(data) {
         let temp = [];
         for(let j = 1; j < data[i].length; j += 2)
         {
-            let name = data[i][j];
-            let time = "";
+            let name = transformName(removeStars(data[i][j]).trim());
+            let time = checkTime(name);
 
-            // IF there is a name but no time with it
-            if(data[i][j] != '' && data[i][j - 1] == '')
+            if(time == null)
             {
-                time = data[i - 1][j - 1];
+                // IF there is a name but no time with it
+                if(data[i][j] != '' && data[i][j - 1] == '')
+                {
+                    time = data[i - 1][j - 1];
+                }
+                // IF ther is a time but no name
+                else if(data[i][j] == '' && data[i][j - 1] != '')
+                {
+                    name = '';
+                    time = '';
+                }
+                // IF there is a name and time
+                else
+                {
+                    time = data[i][j - 1];
+                }
+
+                temp.push(name + " " + transformTime(time));
             }
-            // IF ther is a time but no name
-            else if(data[i][j] == '' && data[i][j - 1] != '')
-            {
-                name = '';
-                time = '';
-            }
-            // IF there is a name and time
             else
             {
-                time = data[i][j - 1];
+                temp.push(name + " " + time);
             }
-
-            temp.push(name + " " + transformTime(time));
         }
         newSchedule.push(temp);
     }
@@ -241,7 +256,6 @@ function getTableDimensions(id)
 // ---------------------------- HELPER FUNCTIONS ---------------------------- 
 
 /**
- * DEPRECIATED
  * Function takes a name and truncates the first name to fit in the schedule
  * @param {string} name - string of an instructors name
  * @return {string} Truncated name in the form of first inital lastname (J Doe)
@@ -253,7 +267,13 @@ function transformName(name)
         return '';
     }
 
-    return name[0] + " " + name.slice(name.indexOf(' ') + 1);
+    var end = name.indexOf(' ', name.indexOf(' ') + 1);
+    if(end == -1)
+    {
+        end = name.length - 1;
+    }
+
+    return name.slice(0, end);
 }
 
 /**
@@ -297,6 +317,40 @@ function mergedAt(merged, row, col)
         col >= range.getColumn() && col < range.getColumn() + range.getNumColumns());
     
     return found !== undefined;
+}
+
+/**
+ * 
+ * @param {*} name 
+ * @returns 
+ */
+function removeStars(name)
+{
+    while(name.indexOf('*') != -1)
+    {
+        name = name.slice(name.indexOf('*') + 1);
+    }
+
+    return name;
+}
+
+/**
+ * 
+ * @param {*} data 
+ * @returns 
+ */
+function checkTime(data)
+{
+    if(data.indexOf('(') != -1)
+    {
+        var time = data.slice(data.indexOf('(') + 1, data.indexOf(')') - 1);
+
+        return time;
+    }
+    else
+    {
+        return null;
+    }
 }
 
 /**
