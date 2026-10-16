@@ -32,7 +32,7 @@ async def on_member_join(member):
 async def unavailable(ctx, *, msg: str = None):
     if msg is None:
         await ctx.send("Did not provide a list of unavailable days e.g !unavailable 10 14 15")
-        
+
     member = ctx.author
     days = parseMessage(msg)
 
@@ -81,8 +81,6 @@ async def confirm(ctx):
         "channel": str(ctx.channel)
     }
 
-    print(str(ctx.channel))
-
     try:
         async with aiohttp.ClientSession() as session:
             async with session.post(
@@ -97,7 +95,7 @@ async def confirm(ctx):
                 result = await response.json(content_type=None)
 
                 if result.get("status") == "success":
-                    await ctx.send(f"Data successfully synchronized with Google Apps Script! {result.get('username')}")
+                    await ctx.send(result.get('message'))
                 else:
                     await ctx.send(f"Apps Script error: {result.get('message')}")
 

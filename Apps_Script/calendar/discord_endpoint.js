@@ -101,6 +101,11 @@ function confirm(username, channel)
     
     const foundCells = finder.findAll();
 
+    if(foundCells.length == 0)
+    {
+        return `Could not find ${username} in the schedule.`;
+    }
+
     foundCells.forEach(cell => {
         var changeCell = sheet.getRange(cell.getA1Notation());
 
@@ -112,6 +117,8 @@ function confirm(username, channel)
         }
 
     });
+
+    return `Successfully confirmed ${username}.`;
 }
 
 /** --------------------------- HELPER FUNCTIONS --------------------------- */
