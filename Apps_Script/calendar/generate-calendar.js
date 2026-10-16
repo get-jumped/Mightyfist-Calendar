@@ -1,44 +1,44 @@
-function createCalendar() {
-    const monthNames = [
+const monthNames = [
         "January", "February", "March", "April", "May", "June",
         "July", "August", "September", "October", "November", "December"
     ];
 
+function createCalendar() {
+    const scriptProps = PropertiesService.getScriptProperties();
+
     // Consider giving the sheet that lists the availability a better name
-    const sourceSheet = SpreadsheetApp.openById('1tlSdMngNsnmXRxxgbEIFBlbQ6UphVphRQHQEW2wtpIs').getSheetByName("Sheet1");
-    var instructorDimensions = getTableDimensions('1tlSdMngNsnmXRxxgbEIFBlbQ6UphVphRQHQEW2wtpIs');
+    const sourceSheet = SpreadsheetApp.openById(scriptProps.getProperty('instructorSheet')).getSheetByName("Sheet1");
+    var instructorDimensions = getTableDimensions(scriptProps.getProperty('instructorSheet'));
     let instructorRange = sourceSheet.getRange(instructorDimensions[0],
         instructorDimensions[1],
         instructorDimensions[2],
         instructorDimensions[3]
     );
     var instructorData = instructorRange.getValues();
-    var instructorMerges = instructorRange.getMergedRanges();
 
-    const traineeSheet = SpreadsheetApp.openById('1SiOwYvIu3a7zYg2w1bUhvj9L4sAw2MmjfecXN-JnbKk').getSheetByName("Sheet1");
-    var traineeDimensions = getTableDimensions('1SiOwYvIu3a7zYg2w1bUhvj9L4sAw2MmjfecXN-JnbKk');
+    const traineeSheet = SpreadsheetApp.openById(scriptProps.getProperty('traineeSheet')).getSheetByName("Sheet1");
+    var traineeDimensions = getTableDimensions(scriptProps.getProperty('traineeSheet'));
     let traineeRange = traineeSheet.getRange(traineeDimensions[0],
         traineeDimensions[1],
         traineeDimensions[2],
         traineeDimensions[3]
     );
     var traineeData = traineeRange.getValues();
-    var traineeMerges = traineeRange.getMergedRanges();
 
     // console.log(traineeMerges.map(r => r.getA1Notation()));
 
-    schedule = fillMerges(instructorData, instructorMerges);
-    console.log(schedule);
+    schedule = fillMerges(instructorData);
+    // console.log(schedule);
 
-    traineeSchedule = fillMerges(traineeData, traineeMerges);
-    console.log(traineeSchedule);
+    traineeSchedule = fillMerges(traineeData);
+    // console.log(traineeSchedule);
 
     const date = new Date();
     const year = date.getFullYear();
     const month = date.getMonth();
 
     let calendar = buildCalendar(year, month);
-    console.log(calendar);
+    // console.log(calendar);
 
     fillCalendar(calendar, schedule, traineeSchedule);
 }
@@ -49,10 +49,9 @@ function createCalendar() {
  * have no timeslots)
  * 
  * @param {2D Array} data a 2D array that represents the schedule
- * @param {Range} merges 
  * @returns newSchedule - a 2D array that is in the format we want to put into the calender spreadsheet
  */
-function fillMerges(data, merges) {
+function fillMerges(data) {
     let newSchedule =[];
 
     for(let i = 1; i < data.length; i++)
@@ -152,10 +151,13 @@ function buildCalendar(year, month) {
  * @param {2D array} schedule represents the schedule of instructors
  */
 function fillCalendar(calendar, schedule, traineeSchedule) {
-    const calendarSheet = SpreadsheetApp.openById('1E_nqdi1ZDexe-v64TkuQq_Th8ScHAq6-KZlFiyxEKjI').getSheetByName("Sheet1");
+    const scriptProps = PropertiesService.getScriptProperties();
+    const calendarSheet = SpreadsheetApp.openById(scriptProps.getProperty('calendarSheet')).getSheetByName("Sheet1");
     const BUFFER = 20;
     const TRANIEES = [Array(5).fill('TRAINEES')];
-    const daySize = 2 + schedule.length + traineeSchedule.length;
+    //Only need plus 1 because schedules include headers for the days which covers the two headers in the loop
+    //Then only 1 is needed to push you past the last row
+    const daySize = 1 + schedule.length + traineeSchedule.length;
 
     for(let i = 1; i <= calendar.length; i++)
     {
@@ -258,6 +260,18 @@ function getTableDimensions(id)
     }
 
     return [row, col, rowLength, colLength];
+}
+
+function updateSheetNames() {
+    var scriptProperties = PropertiesService.getScriptProperties();
+  
+    const year = date.getFullYear();
+    const month = date.getMonth();
+
+    scriptProperties.setProperties({
+        'instructorSchedule': `Instructor Schedule - ${monthNames[month].slice(0, 3)} ${year % 100}`,
+        'traineeSchedule': `Trainee Schedules ${monthNames[month].slice(0, 3)} ${year % 100}`
+    });
 }
 
 // ---------------------------- HELPER FUNCTIONS ---------------------------- 
