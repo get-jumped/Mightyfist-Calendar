@@ -262,22 +262,26 @@ function getTableDimensions(id)
     return [row, col, rowLength, colLength];
 }
 
-function updateSheetNames() {
+function updateSheetNames(chanel, name) {
     var scriptProperties = PropertiesService.getScriptProperties();
-  
-    const date = new Date();
-    var year = date.getFullYear();
-    var month = date.getMonth();
 
-    if(month == 11)
+    if(chanel == "Instructor")
     {
-        year++;
+        scriptProperties.setProperties({
+          'instructorSchedule': name
+        });
     }
-
-    scriptProperties.setProperties({
-        'instructorSchedule': `Instructor Schedule - ${monthNames[(month + 1) % 12].slice(0, 3)} ${year % 100}`,
-        'traineeSchedule': `Trainee Schedules ${monthNames[(month + 1) % 12].slice(0, 3)} ${year % 100}`
-    });
+    else if (chanel == "Trainee")
+    {
+        scriptProperties.setProperties({
+          'traineeSchedule': name
+        });
+    }
+    else
+    {
+        throw new Error('Unexpected file name "' + name + '": expected it to contain "Instructor" or "Trainee".');
+    }
+    
 }
 
 // ---------------------------- HELPER FUNCTIONS ---------------------------- 

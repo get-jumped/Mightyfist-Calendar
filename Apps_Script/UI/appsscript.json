@@ -1,15 +1,14 @@
 {
   "timeZone": "America/Los_Angeles",
+  "exceptionLogging": "STACKDRIVER",
+  "runtimeVersion": "V8",
   "dependencies": {
     "libraries": [
       {
         "userSymbol": "MightyfistCalendar",
-        "version": "17",
         "libraryId": "1_0HEXtMX6Qke010LXZLMPOVvXBrm2kEcsuIAu9MF0TZ2YIg5mUpJzxms",
-        "developmentMode": false
+        "version": "27"
       }
     ]
-  },
-  "exceptionLogging": "STACKDRIVER",
-  "runtimeVersion": "V8"
+  }
 }
