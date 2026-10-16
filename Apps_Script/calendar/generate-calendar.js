@@ -7,8 +7,8 @@ function createCalendar() {
     const scriptProps = PropertiesService.getScriptProperties();
 
     // Consider giving the sheet that lists the availability a better name
-    const sourceSheet = SpreadsheetApp.openById(scriptProps.getProperty('instructorSheet')).getSheetByName("Sheet1");
-    var instructorDimensions = getTableDimensions(scriptProps.getProperty('instructorSheet'));
+    const sourceSheet = SpreadsheetApp.openById(scriptProps.getProperty('instructorSheet')).getSheetByName(scriptProps.getProperty('instructorSchedule'));
+    var instructorDimensions = getTableDimensions(scriptProps.getProperty('instructorSheet'), scriptProps.getProperty('instructorSchedule'));
     let instructorRange = sourceSheet.getRange(instructorDimensions[0],
         instructorDimensions[1],
         instructorDimensions[2],
@@ -16,8 +16,8 @@ function createCalendar() {
     );
     var instructorData = instructorRange.getValues();
 
-    const traineeSheet = SpreadsheetApp.openById(scriptProps.getProperty('traineeSheet')).getSheetByName("Sheet1");
-    var traineeDimensions = getTableDimensions(scriptProps.getProperty('traineeSheet'));
+    const traineeSheet = SpreadsheetApp.openById(scriptProps.getProperty('traineeSheet')).getSheetByName(scriptProps.getProperty('traineeSchedule'));
+    var traineeDimensions = getTableDimensions(scriptProps.getProperty('traineeSheet'), scriptProps.getProperty('traineeSchedule'));
     let traineeRange = traineeSheet.getRange(traineeDimensions[0],
         traineeDimensions[1],
         traineeDimensions[2],
@@ -220,9 +220,9 @@ function fillWeekdaySchedule(sheet, schedule, start)
  * @param {String} id 
  * @return {Array} row, columnm, number of rows followed by number of columns in the table
  */
-function getTableDimensions(id)
+function getTableDimensions(id, name)
 {
-    const sheet = SpreadsheetApp.openById(id).getSheetByName('Sheet1');
+    const sheet = SpreadsheetApp.openById(id).getSheetByName(name);
     const dataRange = sheet.getDataRange()
     const find = dataRange.createTextFinder('Mon')
         .matchCase(false)
@@ -264,6 +264,15 @@ function getTableDimensions(id)
 
 function updateSheetNames(chanel, name) {
     var scriptProperties = PropertiesService.getScriptProperties();
+  
+    const date = new Date();
+    var year = date.getFullYear();
+    var month = date.getMonth();
+
+    if(month == 11)
+    {
+        year++;
+    }
 
     if(chanel == "Instructor")
     {
