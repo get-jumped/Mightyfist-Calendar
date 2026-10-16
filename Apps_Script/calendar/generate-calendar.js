@@ -265,12 +265,18 @@ function getTableDimensions(id)
 function updateSheetNames() {
     var scriptProperties = PropertiesService.getScriptProperties();
   
-    const year = date.getFullYear();
-    const month = date.getMonth();
+    const date = new Date();
+    var year = date.getFullYear();
+    var month = date.getMonth();
+
+    if(month == 11)
+    {
+        year++;
+    }
 
     scriptProperties.setProperties({
-        'instructorSchedule': `Instructor Schedule - ${monthNames[month].slice(0, 3)} ${year % 100}`,
-        'traineeSchedule': `Trainee Schedules ${monthNames[month].slice(0, 3)} ${year % 100}`
+        'instructorSchedule': `Instructor Schedule - ${monthNames[(month + 1) % 12].slice(0, 3)} ${year % 100}`,
+        'traineeSchedule': `Trainee Schedules ${monthNames[(month + 1) % 12].slice(0, 3)} ${year % 100}`
     });
 }
 
