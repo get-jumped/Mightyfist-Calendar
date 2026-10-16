@@ -6,20 +6,21 @@ function doPost(e){
         // Example: Log the data or write it to a Google Sheet
         var command = data.command;
         var username = data.username;
+        var result;
 
         if(command == 'unavailable')
         {
             var days = data.days;
-            unavailable(username, days);
+            result = unavailable(username, days);
         }
         else if (command == 'confirm')
         {
             var channel = data.channel;
-            confirm(username, channel);
+            result = confirm(username, channel);
         }
         
         // Return a success response back to the Python bot
-        return ContentService.createTextOutput(JSON.stringify({ "status": "success", "username": username}))
+        return ContentService.createTextOutput(JSON.stringify({ "status": "success", "username": username, "message": result}))
                                 .setMimeType(ContentService.MimeType.JSON);
                             
     } catch (error) {
@@ -37,6 +38,7 @@ function unavailable(username, days)
 {
     const calendarSheet = SpreadsheetApp.openById('1E_nqdi1ZDexe-v64TkuQq_Th8ScHAq6-KZlFiyxEKjI').getSheetByName("Sheet1");
     const cellLength = getCalendarWeekHeight();
+    var messages = [];
 
     for(let i = 0; i < days.length; i++)
     {
@@ -62,14 +64,17 @@ function unavailable(username, days)
                 const userCol = unavailableEntry.getColumn();
 
                 calendarSheet.getRange(userRow, userCol).setFontLine("line-through");
+                messages.push(`Successfully removed from the ${days[i]}`);
             }
             else{
-              console.log(`${username} not found on ${days[i]}`);
+              messages.push(`Could not find ${username} on the ${days[i]}.`);
             }
         } else {
-            console.log("Value not found.");
+            messages.push(`Could not find ${days[i]} in the calendar.`);
         }
     }
+
+    return messages;
 }
 
 /**

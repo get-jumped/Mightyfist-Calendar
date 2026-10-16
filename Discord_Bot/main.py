@@ -29,7 +29,10 @@ async def on_member_join(member):
 
 
 @bot.command()
-async def unavailable(ctx, *, msg):
+async def unavailable(ctx, *, msg: str = None):
+    if msg is None:
+        await ctx.send("Did not provide a list of unavailable days e.g !unavailable 10 14 15")
+        
     member = ctx.author
     days = parseMessage(msg)
 
@@ -53,7 +56,12 @@ async def unavailable(ctx, *, msg):
                 result = await response.json(content_type=None)
 
                 if result.get("status") == "success":
-                    await ctx.send(f"Data successfully synchronized with Google Apps Script! {result.get('username')}, {result.get('days')}")
+                    message = ''
+                    for m in result.get('message'):
+                        message += m
+                        message += '\n'
+                    
+                    await ctx.send(message)
                 else:
                     await ctx.send(f"Apps Script error: {result.get('message')}")
 
