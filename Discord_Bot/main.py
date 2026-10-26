@@ -4,14 +4,33 @@ import logging
 from dotenv import load_dotenv
 import os
 import aiohttp
+from google.cloud import secretmanager
 
-load_dotenv()
+def get_discord_secret():
+    client = secretmanager.SecretManagerServiceClient()
+    name = "projects/mightyfist-calendar/secrets/DISCORD_TOKEN/versions/latest"
+    response = client.access_secret_version(request={"name": name})
+    return response.payload.data.decode("UTF-8")
 
-token = os.getenv('DISCORD_TOKEN')
 
-url = os.getenv("APPS_SCRIPT_ENDPOINT")
+def get_apps_secret():
+    client = secretmanager.SecretManagerServiceClient()
+    name = "projects/mightyfist-calendar/secrets/APPS_SCRIPT_ENDPOINT/versions/latest"
+    response = client.access_secret_version(request={"name": name})
+    return response.payload.data.decode("UTF-8")
 
-handler = logging.FileHandler(filename='discord.log', encoding='utf-8', mode='w')
+# USE FOR TESTING NOT ON THE CLOUD
+# load_dotenv()
+
+# token = os.getenv('DISCORD_TOKEN')
+
+# url = os.getenv("APPS_SCRIPT_ENDPOINT")
+
+token = get_discord_secret()
+
+url = get_apps_secret()
+
+# handler = logging.FileHandler(filename='discord.log', encoding='utf-8', mode='w')
 intents = discord.Intents.default()
 intents.message_content = True
 intents.members = True
@@ -122,4 +141,5 @@ def parseMessage(msg):
 
 
 
-bot.run(token, log_handler=handler, log_level=logging.DEBUG)
+# bot.run(token, log_handler=handler, log_level=logging.DEBUG)
+bot.run(token, log_handler=None)

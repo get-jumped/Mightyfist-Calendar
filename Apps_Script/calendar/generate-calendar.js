@@ -3,12 +3,14 @@ const monthNames = [
         "July", "August", "September", "October", "November", "December"
     ];
 
-function createCalendar() {
-    const scriptProps = PropertiesService.getScriptProperties();
+const scriptProps = PropertiesService.getScriptProperties();
 
+function createCalendar() {
     // Consider giving the sheet that lists the availability a better name
-    const sourceSheet = SpreadsheetApp.openById(scriptProps.getProperty('instructorSheet')).getSheetByName(scriptProps.getProperty('instructorSchedule'));
-    var instructorDimensions = getTableDimensions(scriptProps.getProperty('instructorSheet'), scriptProps.getProperty('instructorSchedule'));
+    const sourceSheet = SpreadsheetApp.openById(scriptProps.getProperty('instructorSheet'))
+        .getSheetByName(scriptProps.getProperty('instructorSchedule'));
+    var instructorDimensions = getTableDimensions(scriptProps.getProperty('instructorSheet'), 
+        scriptProps.getProperty('instructorSchedule'));
     let instructorRange = sourceSheet.getRange(instructorDimensions[0],
         instructorDimensions[1],
         instructorDimensions[2],
@@ -16,8 +18,10 @@ function createCalendar() {
     );
     var instructorData = instructorRange.getValues();
 
-    const traineeSheet = SpreadsheetApp.openById(scriptProps.getProperty('traineeSheet')).getSheetByName(scriptProps.getProperty('traineeSchedule'));
-    var traineeDimensions = getTableDimensions(scriptProps.getProperty('traineeSheet'), scriptProps.getProperty('traineeSchedule'));
+    const traineeSheet = SpreadsheetApp.openById(scriptProps.getProperty('traineeSheet')).
+        getSheetByName(scriptProps.getProperty('traineeSchedule'));
+    var traineeDimensions = getTableDimensions(scriptProps.getProperty('traineeSheet'), 
+        scriptProps.getProperty('traineeSchedule'));
     let traineeRange = traineeSheet.getRange(traineeDimensions[0],
         traineeDimensions[1],
         traineeDimensions[2],
@@ -151,8 +155,8 @@ function buildCalendar(year, month) {
  * @param {2D array} schedule represents the schedule of instructors
  */
 function fillCalendar(calendar, schedule, traineeSchedule) {
-    const scriptProps = PropertiesService.getScriptProperties();
-    const calendarSheet = SpreadsheetApp.openById(scriptProps.getProperty('calendarSheet')).getSheetByName("Sheet1");
+    const calendarSheet = SpreadsheetApp.openById(scriptProps.getProperty('calendarSheet'))
+        .getSheetByName(scriptProps.getProperty('calendarName'));
     const BUFFER = 20;
     const TRANIEES = [Array(5).fill('TRAINEES')];
     //Only need plus 1 because schedules include headers for the days which covers the two headers in the loop
@@ -222,6 +226,7 @@ function fillWeekdaySchedule(sheet, schedule, start)
  */
 function getTableDimensions(id, name)
 {
+  console.log(id, " ", name)
     const sheet = SpreadsheetApp.openById(id).getSheetByName(name);
     const dataRange = sheet.getDataRange()
     const find = dataRange.createTextFinder('Mon')
@@ -263,26 +268,15 @@ function getTableDimensions(id, name)
 }
 
 function updateSheetNames(chanel, name) {
-    var scriptProperties = PropertiesService.getScriptProperties();
-  
-    const date = new Date();
-    var year = date.getFullYear();
-    var month = date.getMonth();
-
-    if(month == 11)
-    {
-        year++;
-    }
-
     if(chanel == "Instructor")
     {
-        scriptProperties.setProperties({
+        scriptProps.setProperties({
           'instructorSchedule': name
         });
     }
     else if (chanel == "Trainee")
     {
-        scriptProperties.setProperties({
+        scriptProps.setProperties({
           'traineeSchedule': name
         });
     }

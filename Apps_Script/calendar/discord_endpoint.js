@@ -28,7 +28,10 @@ function doPost(e){
                                 .setMimeType(ContentService.MimeType.JSON);
     }
 }
-
+function test()
+{
+  console.log(unavailable('Justin Ong', [5, 16]));
+}
 /**
  * 
  * @param {string} username 
@@ -36,7 +39,8 @@ function doPost(e){
  */
 function unavailable(username, days)
 {
-    const calendarSheet = SpreadsheetApp.openById('1E_nqdi1ZDexe-v64TkuQq_Th8ScHAq6-KZlFiyxEKjI').getSheetByName("Sheet1");
+    const calendarSheet = SpreadsheetApp.openById(scriptProps.getProperty('calendarSheet'))
+      .getSheetByName(scriptProps.getProperty('calendarName'));
     const cellLength = getCalendarWeekHeight();
     var messages = [];
 
@@ -85,16 +89,19 @@ function unavailable(username, days)
 function confirm(username, channel)
 {
     var id = null;
+    var name = null;
     if(channel == "instructor")
     {
-        id = '1tlSdMngNsnmXRxxgbEIFBlbQ6UphVphRQHQEW2wtpIs';
+        id = scriptProps.getProperty('instructorSheet');
+        name = scriptProps.getProperty('instructorSchedule');
     }
     else if(channel == "trainee")
     {
-        id = '1SiOwYvIu3a7zYg2w1bUhvj9L4sAw2MmjfecXN-JnbKk';
+        id = scriptProps.getProperty('traineeSheet');
+        name = scriptProps.getProperty('traineeSchedule');
     }
 
-    const sheet = SpreadsheetApp.openById(id).getSheetByName("Sheet1");
+    const sheet = SpreadsheetApp.openById(id).getSheetByName(name);
     const finder = sheet.getDataRange().createTextFinder(username)
         .matchEntireCell(false)
         .matchCase(false);
@@ -127,7 +134,8 @@ function confirm(username, channel)
  */
 function getCalendarWeekHeight()
 {
-    const calendarSheet = SpreadsheetApp.openById('1E_nqdi1ZDexe-v64TkuQq_Th8ScHAq6-KZlFiyxEKjI').getSheetByName("Sheet1");
+    const calendarSheet = SpreadsheetApp.openById(scriptProps.getProperty('calendarSheet'))
+        .getSheetByName(scriptProps.getProperty('calendarName'));
     const numRows = calendarSheet.getLastRow();
     var height = 1;
 
