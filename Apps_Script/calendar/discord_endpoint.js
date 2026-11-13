@@ -13,10 +13,15 @@ function doPost(e){
             var days = data.days;
             result = unavailable(username, days);
         }
-        else if (command == 'confirm')
+        else if (command == 'confirmSchedule')
         {
             var channel = data.channel;
-            result = confirm(username, channel);
+            result = confirmSchedule(username, channel);
+        }
+        else if (command == 'confirmCalendar')
+        {
+            var channel = data.channel;
+            result = confirmCalendar(username, channel);
         }
         
         // Return a success response back to the Python bot
@@ -28,10 +33,7 @@ function doPost(e){
                                 .setMimeType(ContentService.MimeType.JSON);
     }
 }
-function test()
-{
-  console.log(unavailable('Justin Ong', [5, 16]));
-}
+
 /**
  * 
  * @param {string} username 
@@ -86,7 +88,7 @@ function unavailable(username, days)
  * @param {String} username 
  * @param {String} channel 
  */
-function confirm(username, channel)
+function confirmSchedule(username, channel)
 {
     var id = null;
     var name = null;
@@ -125,7 +127,62 @@ function confirm(username, channel)
 
     });
 
-    return `Successfully confirmed ${username}.`;
+    return `Successfully confirmed schedule for ${username}.`;
+}
+
+/**
+ * NEEDS WORK
+ * @param {String} username 
+ * @param {String} channel 
+ */
+function confirmCalendar(username, channel)
+{
+    var id = scriptProps.getProperty('calendarSheet');
+    var name = scriptProps.getProperty('calendarName');
+    var color = null;
+
+    if(channel == 'instructor')
+    {
+        const colorSheet = SpreadsheetApp.openById(scriptProps.getProperty('colorSheet'))
+            .getSheetByName(scriptProps.getProperty('colorName'));
+        const colorFinder = colorSheet.getDataRange().createTextFinder(username)
+            .matchEntireCell(false)
+            .matchCase(false);
+        
+        const colorCells = colorFinder.findAll();
+
+        colorCells.forEach(cell => {
+            var colorCell = colorSheet.getRange(cell.getA1Notation());
+
+            color = colorCell.getBackground();
+        });
+    }
+    else
+    {
+        color = '#f9cb9c';
+    }
+
+    const sheet = SpreadsheetApp.openById(id).getSheetByName(name);
+    const finder = sheet.getDataRange().createTextFinder(username)
+        .matchEntireCell(false)
+        .matchCase(false);
+    
+    const foundCells = finder.findAll();
+
+    if(foundCells.length == 0)
+    {
+        return `Could not find ${username} in the schedule.`;
+    }
+
+    foundCells.forEach(cell => {
+        var changeCell = sheet.getRange(cell.getA1Notation());
+
+        var data = changeCell.getValue();
+
+        changeCell.setBackground(color);
+    });
+
+    return `Successfully confirmed calendar for ${username}.`;
 }
 
 /** --------------------------- HELPER FUNCTIONS --------------------------- */

@@ -6,29 +6,30 @@ import os
 import aiohttp
 from google.cloud import secretmanager
 
-def get_discord_secret():
-    client = secretmanager.SecretManagerServiceClient()
-    name = "projects/mightyfist-calendar/secrets/DISCORD_TOKEN/versions/latest"
-    response = client.access_secret_version(request={"name": name})
-    return response.payload.data.decode("UTF-8")
+# def get_discord_secret():
+#     client = secretmanager.SecretManagerServiceClient()
+#     name = "projects/mightyfist-calendar/secrets/DISCORD_TOKEN/versions/latest"
+#     response = client.access_secret_version(request={"name": name})
+#     return response.payload.data.decode("UTF-8")
 
 
-def get_apps_secret():
-    client = secretmanager.SecretManagerServiceClient()
-    name = "projects/mightyfist-calendar/secrets/APPS_SCRIPT_ENDPOINT/versions/latest"
-    response = client.access_secret_version(request={"name": name})
-    return response.payload.data.decode("UTF-8")
+# def get_apps_secret():
+#     client = secretmanager.SecretManagerServiceClient()
+#     name = "projects/mightyfist-calendar/secrets/APPS_SCRIPT_ENDPOINT/versions/latest"
+#     response = client.access_secret_version(request={"name": name})
+#     return response.payload.data.decode("UTF-8")
+
+# token = get_discord_secret()
+
+# url = get_apps_secret()
+
 
 # USE FOR TESTING NOT ON THE CLOUD
-# load_dotenv()
+load_dotenv()
 
-# token = os.getenv('DISCORD_TOKEN')
+token = os.getenv('DISCORD_TOKEN')
 
-# url = os.getenv("APPS_SCRIPT_ENDPOINT")
-
-token = get_discord_secret()
-
-url = get_apps_secret()
+url = os.getenv("APPS_SCRIPT_ENDPOINT")
 
 # handler = logging.FileHandler(filename='discord.log', encoding='utf-8', mode='w')
 intents = discord.Intents.default()
@@ -91,11 +92,11 @@ async def unavailable(ctx, *, msg: str = None):
 
 
 @bot.command()
-async def confirm(ctx):
+async def confirmSchedule(ctx):
     member = ctx.author
 
     params = {
-        "command": "confirm",
+        "command": "confirmSchedule",
         "username": str(member.display_name),
         "channel": str(ctx.channel)
     }
@@ -124,6 +125,39 @@ async def confirm(ctx):
         await ctx.send(f"An error occurred while sending data: {e}")    
 
 
+@bot.command()
+async def confirmCalendar(ctx):
+    member = ctx.author
+
+    params = {
+        "command": "confirmCalendar",
+        "username": str(member.display_name),
+        "channel": str(ctx.channel)
+    }
+
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.post(
+                url,
+                json=params,
+                timeout=aiohttp.ClientTimeout(total=15),
+            ) as response:
+                if response.status != 200:
+                    await ctx.send(f"Failed to connect to Apps Script. HTTP Status: {response.status}")
+                    return
+
+                result = await response.json(content_type=None)
+
+                if result.get("status") == "success":
+                    await ctx.send(result.get('message'))
+                else:
+                    await ctx.send(f"Apps Script error: {result.get('message')}")
+
+    except aiohttp.ContentTypeError:
+        await ctx.send("Apps Script returned something that wasn't JSON.")
+    except (aiohttp.ClientError, TimeoutError) as e:
+        await ctx.send(f"An error occurred while sending data: {e}")    
+    
 
 # ------------------------------------- HELPER FUNCITONS -------------------------------------
 def parseMessage(msg):
